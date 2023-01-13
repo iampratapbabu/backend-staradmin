@@ -56,7 +56,8 @@ exports.signup = async(req,res)=>{
     
         res.status(200).json({
             auth:true,
-            token
+            token,
+            user,
         });
         }
 
@@ -87,7 +88,7 @@ exports.login = async(req,res)=>{
         var token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
             expiresIn: 86400 // expires in 24 hours
         });
-        return res.status(200).json({auth:true,token});
+        return res.status(200).json({auth:true,token,user});
 
         // if(user.password == req.body.password){
         //     var token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
@@ -138,7 +139,7 @@ exports.getProfile = async(req,res) =>{
     //res.send(req.params.id);
     try{
         const user = await User.findById(req.params.id);
-        if(!user.fname){
+        if(!user){
             res.status(404).json({
                 msg:"Profile Not Found",
             });
@@ -160,10 +161,11 @@ exports.getProfile = async(req,res) =>{
 exports.updateProfile = async(req,res) =>{
     //res.send(req.params.id);
     const user = await User.findById(req.params.id);
-    const {fname,lname,dob,gender,address1,address2,state,city,country,postcode,free,professional,phone} = req.body;
+    const {fname,lname,dob,gender,address1,address2,state,city,country,postcode,free,professional,phone,role} = req.body;
     user.fname = fname;
     user.lname = lname;
     user.dob = dob;
+    user.role=role;
     user.gender = gender;
     user.address2 = address2;
     user.address1 = address1;
@@ -274,4 +276,57 @@ exports.changeImage = async(req,res) =>{
       });
     }
 }
+
+exports.createUser = async(req,res) =>{
+    try{
+        const {fname,lname,email,password} = req.body;
+        const user = new User({
+            fname,
+            //city:fname, filling other key that is not same with req.body
+            lname,
+            email,
+            password
+        });
+        user.role = "user";
+        user.createdBy = req.params.id;
+        const salt = await bcrypt.genSalt(12);
+        user.password = await bcrypt.hash(password,salt);
+        //console.log("user created",user);
+        await user.save();
+
+        var token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
+        expiresIn: 86400 // expires in 24 hours
+        });
+    
+        res.status(200).json({
+            auth:true,
+            token,
+            user,
+        });
+
+
+    }catch(err){
+        res.status(500).json({
+        error:"manual error message [SERVER ERROR]",
+        errormsg:err.message
+      });
+    }
+}
+
+exports.deleteUser = async (req,res)=>{
+    try{
+        const user = await User.findByIdAndDelete(req.params.id);
+        if(!user) return res.status(404).json({msg:"user not found"});
+        return res.status(200).json({
+            msg:"user deleted"
+        })
+
+    }catch(err){
+        res.status(500).json({
+        error:"manual error message [SERVER ERROR]",
+        errormsg:err.message
+      });
+    }
+}
+
 

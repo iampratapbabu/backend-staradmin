@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema({
         type:Boolean,
     },
     photo:String,
+    role:{
+        type:String,
+        enum:['user','developer','admin'],
+        default:'admin'
+  },
     email:{
         type:String,
         unique:true,
@@ -64,6 +69,9 @@ const userSchema = new mongoose.Schema({
     },
 
     },
+    createdBy:{
+        type:mongoose.Schema.Types.ObjectId
+    }
 
 });
 
