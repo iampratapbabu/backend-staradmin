@@ -2,6 +2,7 @@ const express = require('express');
 const path=require("path");
 //all required route files
 const userRouter = require('./routes/userRoutes');
+const categoryRouter = require('./routes/categoryRoutes');
 
 const app = express();
 app.use(express.json())
@@ -25,6 +26,8 @@ app.get('/',(req,res)=>{
 
 //route middlewares
 app.use('/users',userRouter);
+app.use('/category',categoryRouter);
+
 
 
 module.exports=app;
