@@ -87,4 +87,34 @@ const createCategory = async(req,res) =>{
 	}
 }
 
-module.exports = {myfun,getAllCategories,createCategory,uploadImage}
+const getSingleCategory = async (req,res) =>{
+	try{
+		const category = await Category.findById(req.params.id);
+		if(!category) return res.status(400).json({msg:"Category Not found"});
+		return res.status(200).json({
+			category
+		})
+	}catch(err){
+		res.status(500).json({
+        error:"manual error message [SERVER ERROR]",
+        errormsg:err.message
+      });
+	}
+}
+
+const deleteSingleCategory = async (req,res) =>{
+	try{
+		const category = await Category.findByIdAndDelete(req.params.id);
+		if(!category) return res.status(400).json({msg:"Category Not found"});
+			return res.status(200).json({
+			msg:"Category Delete successfully"
+		})
+	}catch(err){
+		res.status(500).json({
+        error:"manual error message [SERVER ERROR]",
+        errormsg:err.message
+      });
+	}
+}
+
+module.exports = {myfun,getAllCategories,createCategory,uploadImage,getSingleCategory,deleteSingleCategory};
